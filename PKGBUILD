@@ -1,18 +1,18 @@
-# Contributor: Roman Komkov <r.komkov@gmail.com>
-pkgname=tidybattery
-pkgver=20131216
+# Contributor: Nasser Alshammari <designernasser@gmail.com>
+pkgname=dualtidy
+pkgver=20140429
 pkgrel=1
-pkgdesc="Lightweight GTK tray battery monitor. Python fork of slimebattery"
+pkgdesc="Lightweight GTK tray battery monitor for Lenovo Thinkpad x240 with the dual battery setup. Python fork of tidybattery"
 arch=('any')
 url="https://bbs.archlinux.org/viewtopic.php?pid=997284"
 license=('GPL')
 depends=(python2 gtk2 acpi)
 makedepends=()
-source=(https://raw.github.com/decayofmind/tidybattery/master/"$pkgname".py)
-md5sums=('ed1f23a9a2d645b5b03c5775e493d0bc')
+source=(https://raw.github.com/nashamri/dualtidy/master/"$pkgname".py)
+md5sums=('1f6ad0996462a2542c4a34a8bf196142')
 
 package () {
    cd "$srcdir"
-    install -D -m 0755 tidybattery.py "$pkgdir"/usr/bin/tidybattery
+    install -D -m 0755 dualtidy.py "$pkgdir"/usr/bin/dualtidy
     }
 
