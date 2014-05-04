@@ -1,6 +1,6 @@
 # Contributor: Nasser Alshammari <designernasser@gmail.com>
 pkgname=dualtidy
-pkgver=20140429
+pkgver=20140504
 pkgrel=1
 pkgdesc="Lightweight GTK tray battery monitor for Lenovo Thinkpad x240 with the dual battery setup. Python fork of tidybattery"
 arch=('any')
