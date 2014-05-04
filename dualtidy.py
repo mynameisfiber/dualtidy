@@ -23,24 +23,24 @@ import subprocess
 import re
 
 ACPI_CMD = 'acpi'
-TIMEOUT = 2
+TIMEOUT = 2000
 
 class Battery:
     def __init__(self, num="0"):
         self.num = num
         self.icon = gtk.StatusIcon()
         self.update_icon()
-        gobject.timeout_add_seconds(TIMEOUT,self.update_icon)
+        gobject.timeout_add(TIMEOUT, self.update_icon)
 
     def get_battery_info(self):
         if self.num == "0":
             text = subprocess.check_output(ACPI_CMD).split('\n')[0]
         elif self.num == "1":
             text = subprocess.check_output(ACPI_CMD).split('\n')[1]
-        if(re.match("[^:]+:[^,]+,.+",text)):
+        if(re.match("[^:]+:[^,]+,.+", text)):
             data = text.split(',')
-            return {'state':data[0].split(':')[1].strip(' '),
-                    'percentage':int(data[1].strip(' %')),
+            return {'state': data[0].split(':')[1].strip(' '),
+                    'percentage': int(data[1].strip(' %')),
                     'tooltip': text.split(':',1)[1][1:]
                     }
 
@@ -66,7 +66,7 @@ class Battery:
                 return 'battery-low-charging-symbolic'
             elif percentage >= 20:
                 return 'battery-caution-charging-symbolic'
-            elif percentage >= 10:
+            else:
                 return 'battery-empty-charging-symbolic'
 
         elif state == 'Charged':
