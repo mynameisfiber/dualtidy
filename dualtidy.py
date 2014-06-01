@@ -20,9 +20,8 @@
 import gtk
 import gobject
 import subprocess
-import re
 
-ACPI_CMD = 'acpi'
+ACPI_CMD = 'acpitool -b'.split(' ')
 TIMEOUT = 5000
 
 class Battery:
@@ -34,17 +33,20 @@ class Battery:
 
     def get_battery_info(self):
         try:
-            text = subprocess.check_output(ACPI_CMD).split('\n')[self.num]
+            text = subprocess.check_output(ACPI_CMD).split('\n')
+            text_battery = text[self.num]
+            text_all = text[-2]
         except IndexError:
             return {'state':"Unknown", 'percentage':0, 'tooltip':"Battery not found"}
-        if not re.match("[^:]+:[^,]+,.+", text):
-            return {'state':"Unknown", 'percentage':0, 'tooltip':"Not Parsable: %s" % text}
-        data = text.split(',')
-        return {
-            'state': data[0].split(':')[1].strip(' '),
-            'percentage': int(data[1].strip(' %')),
-            'tooltip': text.split(':',1)[1][1:]
-        }
+        try:
+            data = text_battery.split(":", 1)[1].split(',')
+            state = data[0].strip()
+            percentage = float(data[1].strip(' %'))
+            tooltip = "{}\n{}".format(text_battery, text_all)
+            return {"state":state, "percentage":percentage, 'tooltip':tooltip}
+        except Exception, e:
+            print "Parse failed: ", e
+            return {"state":"Unknown", "percentage":0, "tooltip":"Could not parse: {}".format(text)}
 
     def get_icon_name(self, state, percentage):
         if state == 'Discharging' or state == 'Unknown':
@@ -89,7 +91,7 @@ class Battery:
 
 if __name__ == "__main__":
     try:
-        num_batteries = len(subprocess.check_output(ACPI_CMD).split('\n')) - 1
+        num_batteries = len(subprocess.check_output(ACPI_CMD).split('\n')) - 2
         for i in xrange(num_batteries):
             Battery(num = i)
         gtk.main()
