@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #       This program is free software; you can redistribute it and/or modify
@@ -17,12 +17,29 @@
 #       MA 02110-1301, USA.
 #
 
+import sys
 import gtk
 import gobject
 import subprocess
 
 ACPI_CMD = 'acpitool -b'.split(' ')
 TIMEOUT = 5000
+
+
+def rename_process(new_name):
+    """ Renames the process calling the function to the given name. """
+    if 'linux' not in sys.platform:
+        print 'Unsupported platform'
+        return False
+    try:
+        import ctypes
+        from ctypes.util import find_library
+        libc = ctypes.CDLL(find_library('c'))
+        libc.prctl(15, new_name, 0, 0, 0)
+        return True
+    except:
+        print "rename failed"
+        return False
 
 class Battery:
     def __init__(self, num=0):
@@ -35,14 +52,16 @@ class Battery:
         try:
             text = subprocess.check_output(ACPI_CMD).split('\n')
             text_battery = text[self.num]
-            text_all = text[-2]
+            text_all = ''
+            if "All batteries" in text[-2]:
+                text_all = '\n' + text[-2]
         except IndexError:
             return {'state':"Unknown", 'percentage':0, 'tooltip':"Battery not found"}
         try:
             data = text_battery.split(":", 1)[1].split(',')
             state = data[0].strip()
             percentage = float(data[1].strip(' %'))
-            tooltip = "{}\n{}".format(text_battery, text_all)
+            tooltip = "{}{}".format(text_battery, text_all)
             return {"state":state, "percentage":percentage, 'tooltip':tooltip}
         except Exception, e:
             print "Parse failed: ", e
@@ -90,8 +109,10 @@ class Battery:
         return True
 
 if __name__ == "__main__":
+    rename_process("dualtidy")
     try:
-        num_batteries = len(subprocess.check_output(ACPI_CMD).split('\n')) - 2
+        acpi_output = subprocess.check_output(ACPI_CMD).split('\n')
+        num_batteries = sum(1 for line in acpi_output if line.strip().startswith("Battery"))
         for i in xrange(num_batteries):
             Battery(num = i)
         gtk.main()
